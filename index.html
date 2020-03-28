@@ -18,18 +18,20 @@
 	<div style="width:75%;">
 		<canvas id="riemannSumChart"></canvas>
 	</div>
-	<button id="addSample">Add Sample</button>
-	<button id="removeSample">Remove Sample</button>
+	<button id="addSample">+</button>
+	<button id="removeSample">-</button>
 	<button id="changeMode">Change Mode</button>
 
 	<script>
 
 		var minX = 0.0;
 		var maxX = 10.0;
+		var minIntegralX = 1.0;
+		var maxIntegralX = 9.0;
 		var minY = 0.0;
 		var maxY = 3.0;
 		var mode = 0;
-		var numSamples = 2.0;
+		var numSamples = 10.0;
 
 		function getValue(sample) {
 			return Math.sin(sample) + 1.5
@@ -50,11 +52,11 @@
 
 		function generateBarData(numSamples, mode) {
 
-			var dx = (maxX - minX) / numSamples;
+			var dx = (maxIntegralX - minIntegralX) / numSamples;
 			var data = [];
 
 			data.push({
-				x: minX,
+				x: minIntegralX,
 				y: minY
 			});
 
@@ -86,9 +88,13 @@
 					x: prevX + dx,
 					y: value
 				});
+				data.push({
+					x: prevX + dx,
+					y: minY
+				});
 			}
 			data.push({
-				x: maxX,
+				x: maxIntegralX,
 				y: minY
 			});
 
@@ -97,20 +103,20 @@
 
 		function generatePointData(numSamples, mode) {
 
-			var dx = (maxX - minX) / numSamples;
+			var dx = (maxIntegralX - minIntegralX) / numSamples;
 			var data = [];
 
 			var sample = 0.0;
 
 			switch(mode) {
   				case 0:
-    				sample = minX;
+    				sample = minIntegralX;
     				break;
     			case 1:
-    				sample = minX + dx;
+    				sample = minIntegralX + dx;
     				break;
     			case 2:
-    				sample = minX + (dx / 2.0);
+    				sample = minIntegralX + (dx / 2.0);
     				break;
 			}
 
@@ -142,8 +148,8 @@
 				order: 2,
 			}, {
 				label: 'Bar',
-				borderColor: 'rgb(54, 162, 235)',
-				backgroundColor: 'rgb(54, 162, 235)',
+				borderColor: 'rgb(77,173,237)',
+				backgroundColor: 'rgba(54, 162, 235, 0.5)',
 				fill: true,
 				lineTension: 0,
 				data: generateBarData(numSamples, mode),
@@ -152,13 +158,14 @@
 				order: 3,
 			}, {
 				label: 'Bar Points',
-				borderColor: 'rgb(54, 162, 235)',
+				borderColor: 'rgb(77,173,237)',
 				backgroundColor: 'rgb(255, 255, 255)',
 				fill: false,
 				lineTension: 0,
 				data: generatePointData(numSamples, mode),
 				type: 'scatter',
-				pointRadius: 3,
+				pointRadius: 0,
+				borderWidth: 3,
 				order: 1,
 			}]
 		};
