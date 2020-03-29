@@ -13,7 +13,7 @@ var minY = 0.0;
 var maxY = 3.0;
 var mode = modes.LEFT;
 var numSamples = 10.0;
-var sum = 0.0;
+var integralSum = getFunctionIntegralValue(maxIntegralX) - getFunctionIntegralValue(minIntegralX);
 
 function getGraphTitle(mode) {
 
@@ -38,6 +38,10 @@ function getGraphTitle(mode) {
 
 function getFunctionValue(sample) {
 	return Math.sin(sample) + 1.5
+}
+
+function getFunctionIntegralValue(sample) {
+	return -Math.cos(sample) + 1.5 * sample;
 }
 
 function getSegmentValues(numSamples, mode, startX, stopX) {
@@ -139,6 +143,40 @@ function generateBarData(numSamples, mode, startX, stopX) {
 	return data;
 }
 
+function getSum(numSamples, values, mode, minX, maxX) {
+
+	var sum = 0.0;
+	var dx = (maxX - minX) / numSamples;
+	for (var i = 0; i < numSamples; i++) {
+
+		if (mode == modes.TRAPEZOIDAL) {
+			var v1  = values[i];
+			var v2  = values[i + 1];
+			sum += (0.5 * dx * (v1 + v2));
+		}
+		else {
+			sum += (values[i] * dx);
+		}
+	}
+
+	return sum;
+}
+
+function generateConvergenceData(numSamples, mode, minX, maxX, integralSum) {
+
+	var data = [];
+
+	for (var i = 1; i <= numSamples; i++) {
+		var values = getSegmentValues(i, mode, minX, maxX);
+		var sum = getSum(i, values, mode, minX, maxX);
+		data.push({
+			x: i,
+			y: (integralSum - sum)
+		});
+	}
+	return data;
+}
+
 function generatePointData(numSamples, mode) {
 
 	var dx = (maxIntegralX - minIntegralX) / numSamples;
@@ -212,9 +250,23 @@ var lineChartData = {
 	}]
 };
 
+var convergenceChartData = {
+	datasets: [{
+		label: 'Line',
+		borderColor: 'rgb(255, 99, 132)',
+		backgroundColor: 'rgb(255, 99, 132)',
+		fill: false,
+		lineTension: 0,
+		data: generateConvergenceData(numSamples, mode, minIntegralX, maxIntegralX, integralSum),
+		type: 'line',
+		pointRadius: 3,
+		borderWidth: 3,
+	}] 
+};
+
 window.onload = function() {
-	var ctx = document.getElementById('riemannSumChart').getContext('2d');
-	window.myLine = Chart.Scatter(ctx, {
+	var sumCtx = document.getElementById('riemannSumChart').getContext('2d');
+	window.riemannSum = Chart.Scatter(sumCtx, {
 		data: lineChartData,
 		options: {
 			animation: {
@@ -248,6 +300,41 @@ window.onload = function() {
 			}
 		}
 	});
+
+	var convergenceCtx = document.getElementById('riemannConvergenceChart').getContext('2d');
+	window.riemannConvergence = Chart.Scatter(convergenceCtx, {
+		data: convergenceChartData,
+		options: {
+			animation: {
+            	duration: 250,
+        	},
+        	legend: {
+            	display: false,
+        	},
+			tooltips: {
+				enabled: true
+			},
+			responsive: true,
+			stacked: false,
+			title: {
+				display: false,
+			},
+			scales: {
+				xAxes: [{
+					ticks: {
+						min: 0,
+                		max: numSamples + 1,
+            		}
+				}],
+				yAxes: [{
+					ticks: {
+                		min: -1,
+                		max: 1,
+            		}
+				}],
+			}
+		}
+	});
 };
 
 document.getElementById('addSample').addEventListener('click', function() {
@@ -255,7 +342,11 @@ document.getElementById('addSample').addEventListener('click', function() {
 	lineChartData.datasets[1].data = generateBarData(numSamples, mode, minIntegralX, maxIntegralX);
 	lineChartData.datasets[2].data = generatePointData(numSamples, mode);
 
-	window.myLine.update();
+	convergenceChartData.datasets[0].data = generateConvergenceData(numSamples, mode, minIntegralX, maxIntegralX, integralSum);
+	window.riemannConvergence.options.scales.xAxes[0].ticks.max = numSamples + 1;
+
+	window.riemannSum.update();
+	window.riemannConvergence.update();
 });
 
 document.getElementById('removeSample').addEventListener('click', function() {
@@ -263,8 +354,12 @@ document.getElementById('removeSample').addEventListener('click', function() {
 		numSamples--;
 		lineChartData.datasets[1].data = generateBarData(numSamples, mode, minIntegralX, maxIntegralX);
 		lineChartData.datasets[2].data = generatePointData(numSamples, mode);
+		
+		convergenceChartData.datasets[0].data = generateConvergenceData(numSamples, mode, minIntegralX, maxIntegralX, integralSum);
+		window.riemannConvergence.options.scales.xAxes[0].ticks.max = numSamples + 1;
 
-		window.myLine.update();
+		window.riemannSum.update();
+		window.riemannConvergence.update();
 	}
 });
 
@@ -273,6 +368,9 @@ document.getElementById('changeMode').addEventListener('click', function() {
 	lineChartData.datasets[1].data = generateBarData(numSamples, mode, minIntegralX, maxIntegralX);
 	lineChartData.datasets[2].data = generatePointData(numSamples, mode);
 
-	window.myLine.options.title.text = getGraphTitle(mode);
-	window.myLine.update();
+	convergenceChartData.datasets[0].data = generateConvergenceData(numSamples, mode, minIntegralX, maxIntegralX, integralSum);
+
+	window.riemannSum.options.title.text = getGraphTitle(mode);
+	window.riemannSum.update();
+	window.riemannConvergence.update();
 });
