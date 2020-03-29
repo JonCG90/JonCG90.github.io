@@ -6,70 +6,110 @@ var minY = 0.0;
 var maxY = 3.0;
 var mode = 0;
 var numSamples = 10.0;
+var sum = 0.0;
 
-function getValue(sample) {
+function getGraphTitle(mode) {
+
+	var modeText = '';
+	switch(mode) {
+  		case 0:
+    		modeText = 'Left Point';
+    		break;
+    	case 1:
+    	    modeText = 'Right Point';
+    		break;
+    	case 2:
+    	    modeText = 'Mid Point';
+    		break;
+	} 
+
+	return 'Riemann Sum: ' + modeText;
+}
+
+function getFunctionValue(sample) {
 	return Math.sin(sample) + 1.5
 }
 
+function getSegmentValues(numSamples, mode, startX, stopX) {
+
+	var dx = (stopX - startX) / numSamples;
+	var values = [];
+
+	var sampleX = 0.0;
+
+	switch(mode) {
+  		case 0:
+    		sampleX = startX;
+    		break;
+    	case 1:
+    		sampleX = startX + dx;
+    		break;
+    	case 2:
+    		sampleX = startX + (dx / 2.0);
+    		break;
+	}
+
+	for (var i = 0; i < numSamples; i++) {
+
+		var value = getFunctionValue(sampleX);
+		values.push(value);
+
+		sampleX += dx;
+	}
+
+	return values;
+}
+
 function generateLineData() {
+
 	var data = [];
 	dx = (maxX - minX)/50.0;
 
 	for (var sampleX = minX; sampleX <= maxX; sampleX+=dx) {
 		data.push({
 			x: sampleX,
-			y: getValue(sampleX)
+			y: getFunctionValue(sampleX)
 		});
 	}
 	return data;
 }
 
-function generateBarData(numSamples, mode) {
+function generateBarData(numSamples, mode, startX, stopX) {
 
-	var dx = (maxIntegralX - minIntegralX) / numSamples;
+	var dx = (stopX - startX) / numSamples;
+	var values = getSegmentValues(numSamples, mode, startX, stopX);
 	var data = [];
+	var posX = startX;
 
 	data.push({
-		x: minIntegralX,
+		x: posX,
 		y: minY
 	});
 
-	for (var i = 0; i < numSamples; i++) {
+	for (var i = 0; i < values.length; i++) {
 
-		prevSample = data[data.length - 1]
-		prevX = prevSample.x
-
-		sampleX = 0.0;
-		switch(mode) {
-  			case 0:
-    			sampleX = prevX;
-    			break;
-    		case 1:
-    			sampleX = prevX + dx;
-    			break;
-    		case 2:
-    			sampleX = prevX + (dx / 2.0);
-    			break;
-		}
-
-		var value = getValue(sampleX);
+		var value = values[i];
 
 		data.push({
-			x: prevX,
+			x: posX,
+			y: value
+		});
+
+		// Update x position
+		posX += dx;
+
+		data.push({
+			x: posX,
 			y: value
 		});
 		data.push({
-			x: prevX + dx,
-			y: value
-		});
-		data.push({
-			x: prevX + dx,
+			x: posX,
 			y: minY
 		});
 	}
 
 	data.push({
-		x: maxIntegralX,
+		x: posX,
 		y: minY
 	});
 
@@ -97,7 +137,7 @@ function generatePointData(numSamples, mode) {
 
 	for (var i = 0; i < numSamples; i++) {
 
-		var value = getValue(sample);
+		var value = getFunctionValue(sample);
 
 		data.push({
 			x: sample,
@@ -127,7 +167,7 @@ var lineChartData = {
 		backgroundColor: 'rgba(54, 162, 235, 0.5)',
 		fill: true,
 		lineTension: 0,
-		data: generateBarData(numSamples, mode),
+		data: generateBarData(numSamples, mode, minIntegralX, maxIntegralX),
 		type: 'line',
 		pointRadius: 0,
 		order: 3,
@@ -153,12 +193,17 @@ window.onload = function() {
 			animation: {
             	duration: 250,
         	},
+        	legend: {
+            	display: false,
+        	},
+			tooltips: {
+				enabled: false
+			},
 			responsive: true,
-			hoverMode: 'index',
 			stacked: false,
 			title: {
 				display: true,
-				text: 'Chart.js Line Chart - Multi Axis'
+				text: getGraphTitle(mode)
 			},
 			scales: {
 				xAxes: [{
@@ -180,7 +225,7 @@ window.onload = function() {
 
 document.getElementById('addSample').addEventListener('click', function() {
 	numSamples++;
-	lineChartData.datasets[1].data = generateBarData(numSamples, mode);
+	lineChartData.datasets[1].data = generateBarData(numSamples, mode, minIntegralX, maxIntegralX);
 	lineChartData.datasets[2].data = generatePointData(numSamples, mode);
 
 	window.myLine.update();
@@ -189,7 +234,7 @@ document.getElementById('addSample').addEventListener('click', function() {
 document.getElementById('removeSample').addEventListener('click', function() {
 	if (numSamples > 1) {
 		numSamples--;
-		lineChartData.datasets[1].data = generateBarData(numSamples, mode);
+		lineChartData.datasets[1].data = generateBarData(numSamples, mode, minIntegralX, maxIntegralX);
 		lineChartData.datasets[2].data = generatePointData(numSamples, mode);
 
 		window.myLine.update();
@@ -198,8 +243,9 @@ document.getElementById('removeSample').addEventListener('click', function() {
 
 document.getElementById('changeMode').addEventListener('click', function() {
 	mode = (mode + 1) % 3;
-	lineChartData.datasets[1].data = generateBarData(numSamples, mode);
+	lineChartData.datasets[1].data = generateBarData(numSamples, mode, minIntegralX, maxIntegralX);
 	lineChartData.datasets[2].data = generatePointData(numSamples, mode);
 
+	window.myLine.options.title.text = getGraphTitle(mode);
 	window.myLine.update();
 });
