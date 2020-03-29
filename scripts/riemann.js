@@ -186,6 +186,7 @@ var lineChartData = {
 		data: generateLineData(),
 		type: 'line',
 		pointRadius: 0,
+		borderWidth: 4,
 		order: 2,
 	}, {
 		label: 'Bar',
