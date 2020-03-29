@@ -2,8 +2,8 @@ var riemannModule = (function() {
 
 	function setupSum() {
 
-		var sumCtx = document.getElementById('riemannSumChart').getContext('2d');
-		window.riemannSum = Chart.Scatter(sumCtx, {
+		var ctx = document.getElementById('riemannSumChart').getContext('2d');
+		window.riemannSum = Chart.Scatter(ctx, {
 			data: lineChartData,
 			options: {
 				animation: {
@@ -41,8 +41,8 @@ var riemannModule = (function() {
 
 	function setupConvergence() {
 
-		var convergenceCtx = document.getElementById('riemannConvergenceChart').getContext('2d');
-		window.riemannConvergence = Chart.Scatter(convergenceCtx, {
+		var ctx = document.getElementById('riemannConvergenceChart').getContext('2d');
+		window.riemannConvergence = Chart.Scatter(ctx, {
 			data: convergenceChartData,
 			options: {
 				animation: {

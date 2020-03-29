@@ -6,26 +6,26 @@ var monteCarloModule = (function() {
 	function setup() {
 
 		var ctx = document.getElementById('monteCarloChart').getContext('2d');
-			window.monteCarlo = Chart.Scatter(ctx, {
-				data: monteCarloChartData,
-				options: {
-					animation: {
-		            	duration: 250,
-		        	},
-		        	legend: {
-		            	display: false,
-		        	},
-					tooltips: {
-						enabled: false
-					},
-					responsive: true,
-					stacked: false,
-					title: {
-						display: true,
-						text: 'Monte Carlo'
-					},
-				}
-			});
+		window.monteCarlo = Chart.Scatter(ctx, {
+			data: monteCarloChartData,
+			options: {
+				animation: {
+		            duration: 250,
+		        },
+		        legend: {
+		            display: false,
+		        },
+				tooltips: {
+					enabled: false
+				},
+				responsive: true,
+				stacked: false,
+				title: {
+					display: true,
+					text: 'Monte Carlo'
+				},
+			}
+		});
 	}
 
 	function generateMonteCarloData(numSamples, minX, maxX) {
@@ -66,17 +66,27 @@ var monteCarloModule = (function() {
 		}
 	}
 
-	document.getElementById('startSampling').addEventListener('click', function() {
+	function startSampling() {
 		sampling = true;
 		window.setTimeout(addSample, 100);
-	});
+	}
 
-	document.getElementById('stopSampling').addEventListener('click', function() {
+	function stopSampling() {
 		sampling = false;
-	});
+	}
+
+	function reset() {
+		sampling = false;
+		numSamples = 0;
+		monteCarloChartData.datasets[0].data = [];
+		window.monteCarlo.update();
+	}
 
 	return {
-	    setup: setup
+	    setup: setup,
+	    startSampling: startSampling,
+	    stopSampling: stopSampling,
+	    reset: reset
 	 };
 
 })();
