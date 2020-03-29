@@ -1,6 +1,7 @@
 var monteCarloModule = (function() {
 
-	sampling = false;
+	var sampling = false;
+	var numSamples = 10.0;
 
 	function setup() {
 
