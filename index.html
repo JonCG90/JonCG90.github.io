@@ -106,27 +106,7 @@
 				}
 			});
 
-			var monteCarloCtx = document.getElementById('monteCarloChart').getContext('2d');
-			window.monteCarlo = Chart.Scatter(monteCarloCtx, {
-				data: monteCarloChartData,
-				options: {
-					animation: {
-		            	duration: 250,
-		        	},
-		        	legend: {
-		            	display: false,
-		        	},
-					tooltips: {
-						enabled: false
-					},
-					responsive: true,
-					stacked: false,
-					title: {
-						display: true,
-						text: 'Monte Carlo'
-					},
-				}
-			});
+			monteCarloModule.setup();
 		};
 
 	</script>
