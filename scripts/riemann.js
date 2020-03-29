@@ -1,10 +1,17 @@
+const modes = {
+    LEFT: 0,
+    RIGHT: 1,
+    MIDPOINT: 2,
+    TRAPEZOIDAL: 3
+}
+
 var minX = 0.0;
 var maxX = 10.0;
 var minIntegralX = 1.0;
 var maxIntegralX = 9.0;
 var minY = 0.0;
 var maxY = 3.0;
-var mode = 0;
+var mode = modes.LEFT;
 var numSamples = 10.0;
 var sum = 0.0;
 
@@ -12,14 +19,17 @@ function getGraphTitle(mode) {
 
 	var modeText = '';
 	switch(mode) {
-  		case 0:
-    		modeText = 'Left Point';
+  		case modes.LEFT:
+    		modeText = 'Left Rule';
     		break;
-    	case 1:
-    	    modeText = 'Right Point';
+    	case modes.RIGHT:
+    	    modeText = 'Right Right';
     		break;
-    	case 2:
-    	    modeText = 'Mid Point';
+    	case modes.MIDPOINT:
+    	    modeText = 'Midpoint Rule';
+    		break;
+    	case modes.TRAPEZOIDAL:
+    	    modeText = 'Trapezoidal Rule';
     		break;
 	} 
 
@@ -38,14 +48,17 @@ function getSegmentValues(numSamples, mode, startX, stopX) {
 	var sampleX = 0.0;
 
 	switch(mode) {
-  		case 0:
+  		case modes.LEFT:
     		sampleX = startX;
     		break;
-    	case 1:
+    	case modes.RIGHT:
     		sampleX = startX + dx;
     		break;
-    	case 2:
+    	case modes.MIDPOINT:
     		sampleX = startX + (dx / 2.0);
+    		break;
+    	case modes.TRAPEZOIDAL:
+    		sampleX = startX;
     		break;
 	}
 
@@ -55,6 +68,11 @@ function getSegmentValues(numSamples, mode, startX, stopX) {
 		values.push(value);
 
 		sampleX += dx;
+	}
+
+	if (mode == modes.TRAPEZOIDAL) {
+		var value = getFunctionValue(sampleX);
+		values.push(value);
 	}
 
 	return values;
@@ -86,13 +104,18 @@ function generateBarData(numSamples, mode, startX, stopX) {
 		y: minY
 	});
 
-	for (var i = 0; i < values.length; i++) {
+	for (var i = 0; i < numSamples; i++) {
 
-		var value = values[i];
+		var valueLeft = values[i];
+		var valueRight = values[i];
+
+		if (mode == 3) {
+			valueRight = values[i + 1];
+		}
 
 		data.push({
 			x: posX,
-			y: value
+			y: valueLeft
 		});
 
 		// Update x position
@@ -100,7 +123,7 @@ function generateBarData(numSamples, mode, startX, stopX) {
 
 		data.push({
 			x: posX,
-			y: value
+			y: valueRight
 		});
 		data.push({
 			x: posX,
@@ -124,15 +147,18 @@ function generatePointData(numSamples, mode) {
 	var sample = 0.0;
 
 	switch(mode) {
-  		case 0:
+  		case modes.LEFT:
     		sample = minIntegralX;
     		break;
-    	case 1:
+  		case modes.RIGHT:
     		sample = minIntegralX + dx;
     		break;
-    	case 2:
+    	case modes.MIDPOINT:
     		sample = minIntegralX + (dx / 2.0);
     		break;
+    	case modes.TRAPEZOIDAL:
+    	   	sample = minIntegralX;
+    	    break;
 	}
 
 	for (var i = 0; i < numSamples; i++) {
@@ -242,7 +268,7 @@ document.getElementById('removeSample').addEventListener('click', function() {
 });
 
 document.getElementById('changeMode').addEventListener('click', function() {
-	mode = (mode + 1) % 3;
+	mode = (mode + 1) % (modes.TRAPEZOIDAL + 1);
 	lineChartData.datasets[1].data = generateBarData(numSamples, mode, minIntegralX, maxIntegralX);
 	lineChartData.datasets[2].data = generatePointData(numSamples, mode);
 
