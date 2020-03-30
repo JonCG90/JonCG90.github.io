@@ -27,11 +27,15 @@
 	<div style="width:75%;">
 		<canvas id="monteCarloChart"></canvas>
 	</div>
+	<div style="width:75%;">
+		<canvas id="monteCarloErrorChart"></canvas>
+	</div>
 	<button id="startSampling">Start</button>
 	<button id="stopSampling">Stop</button>
 	<button id="reset">Reset</button>
 	<script src="scripts/riemann.js" type="text/javascript"></script>
 	<script src="scripts/monteCarlo.js" type="text/javascript"></script>
+	<script src="scripts/convergenceChart.js" type="text/javascript"></script>
 	<script type="text/javascript">
 		
 		window.onload = function() {
@@ -39,6 +43,7 @@
 			window.riemannSum = riemannModule.setupSum();
 			window.riemannConvergence = riemannModule.setupConvergence();
 			window.monteCarlo = monteCarloModule.setup();
+			window.monteCarloError = errorChartModule.setup('monteCarloErrorChart', monteCarloModule);
 		};
 
 		document.getElementById('addSample').addEventListener('click', function() {
@@ -54,7 +59,10 @@
 		});
 
 		document.getElementById('startSampling').addEventListener('click', function() {
-			monteCarloModule.startSampling();
+			monteCarloModule.startSampling(function() {
+  				errorChartModule.update(monteCarloModule);
+  				window.monteCarloError.update();
+			});
 		});
 
 		document.getElementById('stopSampling').addEventListener('click', function() {

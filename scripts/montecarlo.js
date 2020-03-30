@@ -99,7 +99,7 @@ var monteCarloModule = (function() {
 		}] 
 	};
 
-	function addSample() {
+	function addSample(callback) {
 
 		if (sampling) {
 
@@ -113,14 +113,25 @@ var monteCarloModule = (function() {
 
 			monteCarloChartData.datasets[1].data = samples;
 
+			callback();
 			window.monteCarlo.update();
-			window.setTimeout(addSample, 100);
+
+			function addWithCallback() {
+				addSample(callback);
+			}
+
+			window.setTimeout(addWithCallback, 100);
 		}
 	}
 
-	function startSampling() {
+	function startSampling(callback) {
 		sampling = true;
-		window.setTimeout(addSample, 100);
+
+		function addWithCallback() {
+			addSample(callback);
+		}
+
+		window.setTimeout(addWithCallback, 100);
 	}
 
 	function stopSampling() {
@@ -134,11 +145,29 @@ var monteCarloModule = (function() {
 		window.monteCarlo.update();
 	}
 
+	function getSumValues() {
+
+		var values = [];
+
+		var sum = 0;
+		for (var i = 0; i < samples.length; i++) {
+
+			var sample = samples[i];
+			sum += sample.y;
+
+			var value = (sum / i);
+			values.push(value);
+		}
+
+		return values;
+	}
+
 	return {
 	    setup: setup,
 	    startSampling: startSampling,
 	    stopSampling: stopSampling,
-	    reset: reset
+	    reset: reset,
+	    getSumValues: getSumValues
 	 };
 
 })();
