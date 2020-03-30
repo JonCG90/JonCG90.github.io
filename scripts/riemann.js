@@ -290,6 +290,17 @@ var riemannModule = (function() {
 			sample += dx;
 		}
 
+		// Need to add extra point for trapezoidal
+		if (mode == modes.TRAPEZOIDAL) {
+
+			var value = getFunctionValue(sample);
+
+			data.push({
+				x: sample,
+				y: value
+			});
+		}
+
 		return data;
 	}
 
@@ -323,7 +334,7 @@ var riemannModule = (function() {
 			lineTension: 0,
 			data: generatePointData(numSamples, mode),
 			type: 'scatter',
-			pointRadius: 0,
+			pointRadius: 3,
 			borderWidth: 3,
 			order: 1,
 		}]
