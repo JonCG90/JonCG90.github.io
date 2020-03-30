@@ -3,7 +3,7 @@ var riemannModule = (function() {
 	function setupSum() {
 
 		var ctx = document.getElementById('riemannSumChart').getContext('2d');
-		window.riemannSum = Chart.Scatter(ctx, {
+		var chart = Chart.Scatter(ctx, {
 			data: lineChartData,
 			options: {
 				animation: {
@@ -37,12 +37,14 @@ var riemannModule = (function() {
 				}
 			}
 		});
+
+		return chart;
 	}
 
 	function setupConvergence() {
 
 		var ctx = document.getElementById('riemannConvergenceChart').getContext('2d');
-		window.riemannConvergence = Chart.Scatter(ctx, {
+		var chart = Chart.Scatter(ctx, {
 			data: convergenceChartData,
 			options: {
 				animation: {
@@ -75,6 +77,8 @@ var riemannModule = (function() {
 				}
 			}
 		});
+
+		return chart;
 	}
 
 	const modes = {

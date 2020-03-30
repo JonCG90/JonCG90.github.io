@@ -36,9 +36,9 @@
 		
 		window.onload = function() {
 
-			riemannModule.setupSum();
-			riemannModule.setupConvergence();
-			monteCarloModule.setup();
+			window.riemannSum = riemannModule.setupSum();
+			window.riemannConvergence = riemannModule.setupConvergence();
+			window.monteCarlo = monteCarloModule.setup();
 		};
 
 		document.getElementById('addSample').addEventListener('click', function() {

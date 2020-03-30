@@ -13,7 +13,7 @@ var monteCarloModule = (function() {
 	function setup() {
 
 		var ctx = document.getElementById('monteCarloChart').getContext('2d');
-		window.monteCarlo = Chart.Scatter(ctx, {
+		var chart = Chart.Scatter(ctx, {
 			data: monteCarloChartData,
 			options: {
 				animation: {
@@ -52,6 +52,8 @@ var monteCarloModule = (function() {
 				}
 			}
 		});
+
+		return chart;
 	}
 
 	function getFunctionValue(sample) {
