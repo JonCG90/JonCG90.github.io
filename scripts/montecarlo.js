@@ -1,7 +1,14 @@
 var monteCarloModule = (function() {
 
 	var sampling = false;
-	var numSamples = 10.0;
+
+	var samples = [];
+	var minX = 0.0;
+	var maxX = 10.0;
+	var minIntegralX = 1.0;
+	var maxIntegralX = 9.0;
+	var minY = 0.0;
+	var maxY = 3.0;
 
 	function setup() {
 
@@ -24,18 +31,42 @@ var monteCarloModule = (function() {
 					display: true,
 					text: 'Monte Carlo'
 				},
+				elements: {
+					point: {
+						pointStyle: 'circle'
+					},
+				},
+				scales: {
+					xAxes: [{
+						ticks: {
+							min: minX,
+		                	max: maxX,
+		            	}
+					}],
+					yAxes: [{
+						ticks: {
+		                	min: minY,
+		                	max: maxY,
+		            	}
+					}],
+				}
 			}
 		});
 	}
 
-	function generateMonteCarloData(numSamples, minX, maxX) {
+	function getFunctionValue(sample) {
+		return Math.sin(sample) + 1.5;
+	}
+
+	function generateLineData(minX, maxX) {
 
 		var data = [];
+		var numSamples = 50;
 
-		for (var i = 1; i <= numSamples; i++) {
+		for (var i = minX; i <= maxX; i+=1/numSamples) {
 			data.push({
 				x: i,
-				y: i
+				y: getFunctionValue(i)
 			});
 		}
 		return data;
@@ -48,19 +79,38 @@ var monteCarloModule = (function() {
 			backgroundColor: 'rgb(255, 99, 132)',
 			fill: false,
 			lineTension: 0,
-			data: generateMonteCarloData(numSamples, 0, 10),
+			data: generateLineData(0, 10),
 			type: 'line',
-			pointRadius: 3,
+			pointRadius: 0,
 			borderWidth: 3,
+			order: 1,
+		}, {
+			label: 'Sample Points',
+			borderColor: 'rgb(150, 150, 150)',
+			fill: false,
+			lineTension: 0,
+			data: samples,
+			type: 'scatter',
+			pointRadius: 5,
+			borderWidth: 2,
+			order: 0,
 		}] 
 	};
 
 	function addSample() {
 
 		if (sampling) {
-			numSamples++;
 
-			monteCarloChartData.datasets[0].data = generateMonteCarloData(numSamples, 0, 10);
+			var sample = minX + (maxX - minX) * Math.random();
+			var value = getFunctionValue(sample);
+
+			samples.push({
+				x: sample,
+				y: value
+			});
+
+			monteCarloChartData.datasets[1].data = samples;
+
 			window.monteCarlo.update();
 			window.setTimeout(addSample, 100);
 		}
@@ -77,8 +127,8 @@ var monteCarloModule = (function() {
 
 	function reset() {
 		sampling = false;
-		numSamples = 0;
-		monteCarloChartData.datasets[0].data = [];
+		samples = [];
+		monteCarloChartData.datasets[1].data = samples;
 		window.monteCarlo.update();
 	}
 
