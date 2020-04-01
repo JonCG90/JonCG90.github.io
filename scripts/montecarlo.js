@@ -2,7 +2,8 @@ var monteCarloModule = (function() {
 
 	var sampling = false;
 
-	var samples = [];
+	var samplePoints = [];
+	var sampleBars = [];
 	var minX = 0.0;
 	var maxX = 10.0;
 	var minIntegralX = 1.0;
@@ -76,9 +77,7 @@ var monteCarloModule = (function() {
 
 	var monteCarloChartData = {
 		datasets: [{
-			label: 'Line',
 			borderColor: 'rgb(255, 99, 132)',
-			backgroundColor: 'rgb(255, 99, 132)',
 			fill: false,
 			lineTension: 0,
 			data: generateLineData(0, 10),
@@ -87,14 +86,22 @@ var monteCarloModule = (function() {
 			borderWidth: 3,
 			order: 1,
 		}, {
-			label: 'Sample Points',
 			borderColor: 'rgb(150, 150, 150)',
 			fill: false,
 			lineTension: 0,
-			data: samples,
+			data: [],
 			type: 'scatter',
 			pointRadius: 5,
 			borderWidth: 2,
+			order: 0,
+		}, {
+			borderColor: 'rgb(0, 99, 132)',
+			fill: false,
+			lineTension: 0,
+			data: [],
+			type: 'line',
+			pointRadius: 0,
+			borderWidth: 1,
 			order: 0,
 		}] 
 	};
@@ -106,12 +113,28 @@ var monteCarloModule = (function() {
 			var sample = minX + (maxX - minX) * Math.random();
 			var value = getFunctionValue(sample);
 
-			samples.push({
+			// Update sample point data
+			samplePoints.push({
 				x: sample,
 				y: value
 			});
 
-			monteCarloChartData.datasets[1].data = samples;
+			// Update sample bars data
+			sampleBars.push({
+				x: sample,
+				y: -1
+			});
+			sampleBars.push({
+				x: sample,
+				y: value
+			});
+			sampleBars.push({
+				x: sample,
+				y: -1
+			});
+
+			monteCarloChartData.datasets[1].data = samplePoints;
+			monteCarloChartData.datasets[2].data = sampleBars;
 
 			callback();
 			window.monteCarlo.update();
@@ -140,8 +163,12 @@ var monteCarloModule = (function() {
 
 	function reset() {
 		sampling = false;
-		samples = [];
-		monteCarloChartData.datasets[1].data = samples;
+		samplePoints = [];
+		sampleBars = [];
+
+		monteCarloChartData.datasets[1].data = samplePoints;
+		monteCarloChartData.datasets[2].data = sampleBars;
+
 		window.monteCarlo.update();
 	}
 
@@ -150,9 +177,9 @@ var monteCarloModule = (function() {
 		var values = [];
 
 		var sum = 0;
-		for (var i = 0; i < samples.length; i++) {
+		for (var i = 0; i < samplePoints.length; i++) {
 
-			var sample = samples[i];
+			var sample = samplePoints[i];
 			sum += sample.y;
 
 			var value = (sum / i);
