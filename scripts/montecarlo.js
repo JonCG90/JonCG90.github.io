@@ -4,12 +4,11 @@ var monteCarloModule = (function() {
 
 	var samplePoints = [];
 	var sampleBars = [];
-	var minX = 0.0;
-	var maxX = 10.0;
-	var minIntegralX = 1.0;
-	var maxIntegralX = 9.0;
+	var minX = -Math.PI / 2.0;
+	var maxX = Math.PI / 2.0;
 	var minY = 0.0;
-	var maxY = 3.0;
+	var maxY = 1.1;
+	var sampleRate = 10;
 
 	function setup() {
 
@@ -38,16 +37,9 @@ var monteCarloModule = (function() {
 					},
 				},
 				scales: {
-					xAxes: [{
-						ticks: {
-							min: minX,
-		                	max: maxX,
-		            	}
-					}],
 					yAxes: [{
 						ticks: {
-		                	min: minY,
-		                	max: maxY,
+		                	min: 0,
 		            	}
 					}],
 				}
@@ -58,7 +50,10 @@ var monteCarloModule = (function() {
 	}
 
 	function getFunctionValue(sample) {
-		return Math.sin(sample) + 1.5;
+
+		let value = Math.cos(sample);
+
+		return value;
 	}
 
 	function generateLineData(minX, maxX) {
@@ -80,7 +75,7 @@ var monteCarloModule = (function() {
 			borderColor: 'rgb(255, 99, 132)',
 			fill: false,
 			lineTension: 0,
-			data: generateLineData(0, 10),
+			data: generateLineData(minX, maxX),
 			type: 'line',
 			pointRadius: 0,
 			borderWidth: 3,
@@ -143,7 +138,7 @@ var monteCarloModule = (function() {
 				addSample(callback);
 			}
 
-			window.setTimeout(addWithCallback, 100);
+			window.setTimeout(addWithCallback, sampleRate);
 		}
 	}
 
@@ -154,7 +149,7 @@ var monteCarloModule = (function() {
 			addSample(callback);
 		}
 
-		window.setTimeout(addWithCallback, 100);
+		window.setTimeout(addWithCallback, sampleRate);
 	}
 
 	function stopSampling() {
@@ -180,10 +175,10 @@ var monteCarloModule = (function() {
 		for (var i = 0; i < samplePoints.length; i++) {
 
 			var sample = samplePoints[i];
-			sum += sample.y;
+			sum += sample.y * (maxX - minX);
 
 			var value = (sum / i);
-			values.push(value);
+			values.push(value - 2.0);
 		}
 
 		return values;

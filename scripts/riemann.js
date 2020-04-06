@@ -22,16 +22,9 @@ var riemannModule = (function() {
 					text: getGraphTitle(mode)
 				},
 				scales: {
-					xAxes: [{
-						ticks: {
-							min: minX,
-		                	max: maxX,
-		            	}
-					}],
 					yAxes: [{
 						ticks: {
 		                	min: minY,
-		                	max: maxY,
 		            	}
 					}],
 				}
@@ -70,8 +63,8 @@ var riemannModule = (function() {
 					}],
 					yAxes: [{
 						ticks: {
-		                	min: -1,
-		                	max: 1,
+		                	min: -2,
+		                	max: 2,
 		            	}
 					}],
 				}
@@ -88,15 +81,12 @@ var riemannModule = (function() {
 	    TRAPEZOIDAL: 3
 	}
 
-	var minX = 0.0;
-	var maxX = 10.0;
-	var minIntegralX = 1.0;
-	var maxIntegralX = 9.0;
+	var minX = -Math.PI / 2.0;
+	var maxX = Math.PI / 2.0;
 	var minY = 0.0;
-	var maxY = 3.0;
 	var mode = modes.LEFT;
 	var numSamples = 10.0;
-	var integralSum = getFunctionIntegralValue(maxIntegralX) - getFunctionIntegralValue(minIntegralX);
+	var integralSum = getFunctionIntegralValue(maxX) - getFunctionIntegralValue(minX);
 
 	function getGraphTitle(mode) {
 
@@ -120,11 +110,14 @@ var riemannModule = (function() {
 	}
 
 	function getFunctionValue(sample) {
-		return Math.sin(sample) + 1.5
+
+		let value = Math.cos(sample);
+
+		return value;
 	}
 
 	function getFunctionIntegralValue(sample) {
-		return -Math.cos(sample) + 1.5 * sample;
+		return Math.sin(sample);
 	}
 
 	function getSegmentValues(numSamples, mode, startX, stopX) {
@@ -168,12 +161,15 @@ var riemannModule = (function() {
 	function generateLineData() {
 
 		var data = [];
-		dx = (maxX - minX)/50.0;
+		let lineSamples = 50
+		dx = (maxX - minX)/lineSamples;
 
-		for (var sampleX = minX; sampleX <= maxX; sampleX+=dx) {
+		for (var i = minX; i < lineSamples + 1; i++) {
+
+			let sample = minX + i * dx;
 			data.push({
-				x: sampleX,
-				y: getFunctionValue(sampleX)
+				x: sample,
+				y: getFunctionValue(sample)
 			});
 		}
 		return data;
@@ -262,23 +258,23 @@ var riemannModule = (function() {
 
 	function generatePointData(numSamples, mode) {
 
-		var dx = (maxIntegralX - minIntegralX) / numSamples;
+		var dx = (maxX - minX) / numSamples;
 		var data = [];
 
 		var sample = 0.0;
 
 		switch(mode) {
 	  		case modes.LEFT:
-	    		sample = minIntegralX;
+	    		sample = minX;
 	    		break;
 	  		case modes.RIGHT:
-	    		sample = minIntegralX + dx;
+	    		sample = minX + dx;
 	    		break;
 	    	case modes.MIDPOINT:
-	    		sample = minIntegralX + (dx / 2.0);
+	    		sample = minX + (dx / 2.0);
 	    		break;
 	    	case modes.TRAPEZOIDAL:
-	    	   	sample = minIntegralX;
+	    	   	sample = minX;
 	    	    break;
 		}
 
@@ -326,7 +322,7 @@ var riemannModule = (function() {
 			backgroundColor: 'rgba(54, 162, 235, 0.5)',
 			fill: true,
 			lineTension: 0,
-			data: generateBarData(numSamples, mode, minIntegralX, maxIntegralX),
+			data: generateBarData(numSamples, mode, minX, maxX),
 			type: 'line',
 			pointRadius: 0,
 			order: 3,
@@ -351,7 +347,7 @@ var riemannModule = (function() {
 			backgroundColor: 'rgb(255, 99, 132)',
 			fill: false,
 			lineTension: 0,
-			data: generateConvergenceData(numSamples, mode, minIntegralX, maxIntegralX, integralSum),
+			data: generateConvergenceData(numSamples, mode, minX, maxX, integralSum),
 			type: 'line',
 			pointRadius: 3,
 			borderWidth: 3,
@@ -361,10 +357,10 @@ var riemannModule = (function() {
 	function addSample() {
 
 		numSamples++;
-		lineChartData.datasets[1].data = generateBarData(numSamples, mode, minIntegralX, maxIntegralX);
+		lineChartData.datasets[1].data = generateBarData(numSamples, mode, minX, maxX);
 		lineChartData.datasets[2].data = generatePointData(numSamples, mode);
 
-		convergenceChartData.datasets[0].data = generateConvergenceData(numSamples, mode, minIntegralX, maxIntegralX, integralSum);
+		convergenceChartData.datasets[0].data = generateConvergenceData(numSamples, mode, minX, maxX, integralSum);
 		window.riemannConvergence.options.scales.xAxes[0].ticks.max = numSamples + 1;
 
 		window.riemannSum.update();
@@ -375,10 +371,10 @@ var riemannModule = (function() {
 
 		if (numSamples > 1) {
 			numSamples--;
-			lineChartData.datasets[1].data = generateBarData(numSamples, mode, minIntegralX, maxIntegralX);
+			lineChartData.datasets[1].data = generateBarData(numSamples, mode, minX, maxX);
 			lineChartData.datasets[2].data = generatePointData(numSamples, mode);
 			
-			convergenceChartData.datasets[0].data = generateConvergenceData(numSamples, mode, minIntegralX, maxIntegralX, integralSum);
+			convergenceChartData.datasets[0].data = generateConvergenceData(numSamples, mode, minX, maxX, integralSum);
 			window.riemannConvergence.options.scales.xAxes[0].ticks.max = numSamples + 1;
 
 			window.riemannSum.update();
@@ -389,10 +385,10 @@ var riemannModule = (function() {
 	function changeMode() {
 
 		mode = (mode + 1) % (modes.TRAPEZOIDAL + 1);
-		lineChartData.datasets[1].data = generateBarData(numSamples, mode, minIntegralX, maxIntegralX);
+		lineChartData.datasets[1].data = generateBarData(numSamples, mode, minX, maxX);
 		lineChartData.datasets[2].data = generatePointData(numSamples, mode);
 
-		convergenceChartData.datasets[0].data = generateConvergenceData(numSamples, mode, minIntegralX, maxIntegralX, integralSum);
+		convergenceChartData.datasets[0].data = generateConvergenceData(numSamples, mode, minX, maxX, integralSum);
 
 		window.riemannSum.options.title.text = getGraphTitle(mode);
 		window.riemannSum.update();
